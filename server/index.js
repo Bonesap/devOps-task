@@ -1,24 +1,25 @@
-const express = require("express");
+import express from "express";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = 3000;
 
-app.get("/", (req, res) => {
-  res.send("API Service is running");
-});
+app.get("/", (req, res) => res.send("Hello, World!"));
 
+// Лівнес проба
 app.get("/healthz", (req, res) => {
-  res.send("OK");
+  res.status(200).send("OK");
 });
 
-app.get("/ready", (req, res) => {
-  res.send("OK");
-});
-
+// Старт проба
 app.get("/startup", (req, res) => {
-  res.send("OK");
+  res.status(200).send("Started");
 });
 
-app.listen(PORT, () => {
-  console.log(`API Service running on port ${PORT}`);
+// Реалізація проби готовності
+app.get("/readiness", (req, res) => {
+  res.status(200).send("Ready");
+});
+
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
 });

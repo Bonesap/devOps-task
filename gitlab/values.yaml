@@ -1,0 +1,18 @@
+global:
+  appConfig:
+    object_store:
+      enabled: true
+      connection:
+        secret: gitlab-object-storage-secret
+        key: connection
+      artifacts:
+        bucket: gitlab-artifacts
+      lfs:
+        bucket: gitlab-lfs
+      uploads:
+        bucket: gitlab-uploads
+      packages:
+        bucket: gitlab-packages
+
+certmanager-issuer:
+  email: testtest200212345@gmail.com
