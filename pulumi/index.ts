@@ -1,12 +1,10 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as k8s from "@pulumi/kubernetes";
 
-// Create a namespace for Argo CD
 const argoNamespace = new k8s.core.v1.Namespace("argocd", {
   metadata: { name: "argocd" },
 });
 
-// Deploy Argo CD
 const argoCdDeployment = new k8s.apps.v1.Deployment("argocd-server", {
   metadata: {
     namespace: argoNamespace.metadata.name,
@@ -30,7 +28,6 @@ const argoCdDeployment = new k8s.apps.v1.Deployment("argocd-server", {
   },
 });
 
-// Expose Argo CD server as a service
 const argoCdService = new k8s.core.v1.Service("argocd-server-service", {
   metadata: {
     namespace: argoNamespace.metadata.name,
@@ -43,7 +40,6 @@ const argoCdService = new k8s.core.v1.Service("argocd-server-service", {
   },
 });
 
-// Create an Argo CD application
 const argoCdApp = new k8s.apiextensions.CustomResource("my-app", {
   apiVersion: "argoproj.io/v1alpha1",
   kind: "Application",
@@ -65,5 +61,4 @@ const argoCdApp = new k8s.apiextensions.CustomResource("my-app", {
   },
 });
 
-// Export the Argo CD URL
 export const argoCdUrl = argoCdService.status.loadBalancer.ingress[0].hostname;
