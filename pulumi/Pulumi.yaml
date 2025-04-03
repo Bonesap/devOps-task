@@ -1,4 +1,4 @@
-name: project
+name: test
 description: A minimal Kubernetes TypeScript Pulumi program
 runtime:
   name: nodejs

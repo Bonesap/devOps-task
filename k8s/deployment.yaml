@@ -1,20 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-app
+  name: my-server
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: my-app
+      app: my-server
   template:
     metadata:
       labels:
-        app: my-app
+        app: my-server
     spec:
       containers:
-        - name: my-app
-          image: node:latest
+        - name: my-server
+          image: bonesap/my-express-app:latest
+          imagePullPolicy: Always
           resources:
             limits:
               cpu: "500m"
@@ -28,17 +29,17 @@ spec:
             httpGet:
               path: /healthz
               port: 3000
-            initialDelaySeconds: 3
-            periodSeconds: 5
+            initialDelaySeconds: 5
+            periodSeconds: 10
           readinessProbe:
             httpGet:
               path: /readiness
               port: 3000
-            initialDelaySeconds: 3
-            periodSeconds: 5
+            initialDelaySeconds: 5
+            periodSeconds: 10
           startupProbe:
             httpGet:
-              path: /startup
+              path: /
               port: 3000
             initialDelaySeconds: 5
-            periodSeconds: 5
+            periodSeconds: 10

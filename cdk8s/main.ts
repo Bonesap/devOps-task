@@ -8,16 +8,14 @@ import {
   IntOrString,
 } from "./imports/k8s";
 
-class MyChart extends Chart {
+export class MyChart extends Chart {
   constructor(scope: Construct, ns: string, appLabel: string) {
     super(scope, ns);
 
-    // Створення Namespace
     const namespace = new KubeNamespace(this, "my-app-namespace", {
       metadata: { name: "my-app" },
     });
 
-    // Створення Deployment для вашого додатку
     new KubeDeployment(this, "my-app-deployment", {
       metadata: {
         name: "my-app",
@@ -34,7 +32,7 @@ class MyChart extends Chart {
             containers: [
               {
                 name: "my-app",
-                image: "my-app-image:v1", // Замість цього використовуйте ваш Docker-образ
+                image: "bonesap/my-express-app:latest",
                 ports: [{ containerPort: 80 }],
                 readinessProbe: {
                   httpGet: {
@@ -68,7 +66,6 @@ class MyChart extends Chart {
       },
     });
 
-    // Створення Service для вашого додатку
     new KubeService(this, "my-app-service", {
       metadata: {
         name: "my-app-service",
@@ -80,7 +77,6 @@ class MyChart extends Chart {
       },
     });
 
-    // Створення Ingress для вашого додатку
     new KubeIngress(this, "my-app-ingress", {
       metadata: {
         name: "my-app-ingress",
@@ -94,7 +90,7 @@ class MyChart extends Chart {
               paths: [
                 {
                   path: "/",
-                  pathType: "Prefix", // Вказуємо правильний тип шляху
+                  pathType: "Prefix",
                   backend: {
                     service: {
                       name: "my-app-service",

@@ -1,16 +1,69 @@
+import * as pulumi from "@pulumi/pulumi";
 import * as k8s from "@pulumi/kubernetes";
 
-const namespace = new k8s.core.v1.Namespace("argocd", {
+// Create a namespace for Argo CD
+const argoNamespace = new k8s.core.v1.Namespace("argocd", {
   metadata: { name: "argocd" },
 });
 
-const argocd = new k8s.helm.v3.Release("argocd", {
-  chart: "argo-cd",
-  version: "5.45.1",
-  namespace: namespace.metadata.name,
-  repositoryOpts: {
-    repo: "https://argoproj.github.io/argo-helm",
+// Deploy Argo CD
+const argoCdDeployment = new k8s.apps.v1.Deployment("argocd-server", {
+  metadata: {
+    namespace: argoNamespace.metadata.name,
+    name: "argocd-server",
+  },
+  spec: {
+    selector: { matchLabels: { app: "argocd-server" } },
+    replicas: 1,
+    template: {
+      metadata: { labels: { app: "argocd-server" } },
+      spec: {
+        containers: [
+          {
+            name: "argocd-server",
+            image: "argoproj/argocd:v2.0.0",
+            ports: [{ containerPort: 80 }],
+          },
+        ],
+      },
+    },
   },
 });
 
-export const argocdNamespace = namespace.metadata.name;
+// Expose Argo CD server as a service
+const argoCdService = new k8s.core.v1.Service("argocd-server-service", {
+  metadata: {
+    namespace: argoNamespace.metadata.name,
+    name: "argocd-server",
+  },
+  spec: {
+    selector: { app: "argocd-server" },
+    ports: [{ port: 80, targetPort: 80 }],
+    type: "LoadBalancer",
+  },
+});
+
+// Create an Argo CD application
+const argoCdApp = new k8s.apiextensions.CustomResource("my-app", {
+  apiVersion: "argoproj.io/v1alpha1",
+  kind: "Application",
+  metadata: {
+    namespace: argoNamespace.metadata.name,
+    name: "my-app",
+  },
+  spec: {
+    source: {
+      repoURL: "https://gitlab.com/devops1914913/test3.git",
+      targetRevision: "main",
+      path: "./",
+    },
+    destination: {
+      server: "https://kubernetes.default.svc",
+      namespace: "default",
+    },
+    project: "default",
+  },
+});
+
+// Export the Argo CD URL
+export const argoCdUrl = argoCdService.status.loadBalancer.ingress[0].hostname;
